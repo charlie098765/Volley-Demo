@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -24,11 +25,11 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLoader.ImageListener;
 import com.android.volley.toolbox.ImageRequest;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.StringRequest;
 import com.charlie.volley.application.CHApplication;
-import com.charlie.volley.bean.City;
 import com.charlie.volley.core.Result;
 import com.charlie.volley.customrequest.GsonRequest;
 import com.charlie.volley.customrequest.XmlRequest;
@@ -39,8 +40,8 @@ import com.charlie.volley.interfaces.ResponseCallBackListener;
  * @author Charlie
  *
  */
-public  class RequestUtils<T> {
-	private final static String TAG="RequestUtils_Log";
+public  class RequestUtils {
+	private final static String TAG="RequestUtils_VolleyLog";
 	
 	
 	/**
@@ -176,7 +177,26 @@ public  class RequestUtils<T> {
 	
 		addToQueue(ir);
 	}
-		
+	/**
+	 * 获取jsonArray
+	 * @param context
+	 * @param url
+	 * @param listener
+	 */
+	public static void getJsonArrayResult(Context context,String url,final ResponseCallBackListener listener){
+		JsonArrayRequest jar=new JsonArrayRequest(url,new Listener<JSONArray>() {
+
+			@Override
+			public void onResponse(JSONArray response) {
+				listener.OnResponseCallBack(new Result()
+											.setState(Constants.STATUS_SUCCESS)
+											.setTag(response));
+				
+			}
+		}, getErrorListener(listener));
+		addToQueue(jar);
+	
+	}		
 		/**
 	 * 请求获取json对象
 	 * @param context
@@ -184,7 +204,7 @@ public  class RequestUtils<T> {
 	 * @param map
 	 * @param listener
 	 */
-	public static void getJsonResult(Context context,String url,final ResponseCallBackListener listener){
+	public static void getJsonObjectResult(Context context,String url,final ResponseCallBackListener listener){
 		
 		 JsonObjectRequest	joRequest = new JsonObjectRequest(Method.POST,url, null, new Response.Listener<JSONObject>() {
 
@@ -278,6 +298,7 @@ public  class RequestUtils<T> {
 
 			@Override
 			public void onResponse(String response) {
+				
 				Log.i(TAG, response);
 				listener.OnResponseCallBack(new Result().setState(Constants.STATUS_SUCCESS).setMessage(response));
 			}

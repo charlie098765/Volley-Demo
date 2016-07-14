@@ -4,6 +4,7 @@ package com.charlie.volley;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,6 +18,7 @@ import com.charlie.volley.utils.Constants;
 import com.charlie.volley.utils.RequestUtils;
 import com.charlie.volley.utils.ResourceUtil;
 import com.example.testvolley.R;
+import com.google.gson.JsonArray;
 
 import android.app.Activity;
 import android.content.Context;
@@ -52,7 +54,8 @@ public class MainActivity extends Activity {
 		
 
         
-        String jsonUrl="http://localhost:8888/testByJSP.action";//自己的服务器测试工程，设置手动代理的时候可以访问
+        String jsonUrl="http://localhost:8888/JSON";//自己的服务器测试工程，设置手动代理的时候可以访问
+        String jsonArrayUrl="http://localhost:8888/testByJSP.action";//自己的服务器测试工程，设置手动代理的时候可以访问
 //       服务器获取的json字符串格式{"success":true,"user":{"password":"JSON","name":"JSONServlet","say":"Hello , i am a servlet !","id":"123"}}
         String url="http://www.baidu.com";
         String xmlUrl="http://flash.weather.com.cn/wmaps/xml/china.xml";
@@ -60,14 +63,35 @@ public class MainActivity extends Activity {
 //        getXml(xmlUrl);
 //        getImg(imgUrl);
 //        getString(url);
-//		getJson(jsonUrl);
-		getGson(jsonUrl);
+		getJson(jsonUrl);
+		
+//		getGson(jsonUrl);
+//		getJsonArray(jsonArrayUrl);
+		
 		
 		
 		
 		
 		
     }
+
+	private void getJsonArray(String jsonUrl) {
+		RequestUtils.getJsonArrayResult(context, jsonUrl, new ResponseCallBackListener() {
+			
+			@Override
+			public void OnResponseCallBack(Result result) {
+				if(result.getState()==Constants.STATUS_SUCCESS){
+				JSONArray ja=(JSONArray) result.getTag();
+				try {
+					tv_show.setText(ja.getJSONObject(0).toString());
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				}
+				
+			}
+		});
+	}
 
 	private void getGson(String jsonUrl) {
 		RequestUtils.getGsonResult(context, jsonUrl, UserAllInfo.class, new ResponseCallBackListener() {
@@ -123,13 +147,13 @@ public class MainActivity extends Activity {
 
 	private void getJson(String url) {
 		// 3.获取json对象
-		   RequestUtils.getJsonResult(context, url, new ResponseCallBackListener() {
+		   RequestUtils.getJsonObjectResult(context, url, new ResponseCallBackListener() {
 
 	    @Override
 		public void OnResponseCallBack(Result result) {
 				try {
 					if(result.getState()==Constants.STATUS_SUCCESS){
-						JSONObject jo=new JSONObject(result.getMessage());
+						JSONObject jo=new JSONObject(result.getTag().toString());
 						String str = null;
 						if(jo!=null){
 							 str=jo.get("user").toString();
