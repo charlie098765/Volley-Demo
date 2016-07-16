@@ -1,0 +1,7 @@
+1.屏幕适配
+1）项目已经做好了一个固定屏幕尺寸对应的dimens.xml，则用工具生成相应不用分辨率(eg values-1280*800)文件夹下的dimens.xml
+每个文件夹下均有一个
+工具类：DimensUtils.java
+
+2)项目才开始做，什么都没有，则用个自动生成的工具类，各个不同分辨率对应的value-xx文件夹下eg:1-1000px的dimens.xml,备用
+对应工具类：GenerateValueFiles.java GenerateValueFilesLandscape.java

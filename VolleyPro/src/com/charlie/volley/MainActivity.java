@@ -25,11 +25,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 /**
  * volley测试Activity
  * @author Charlie
+ *by  http://blog.csdn.net/ysh06201418/article/details/46443235
  *
  */
 public class MainActivity extends Activity {
@@ -55,13 +57,13 @@ public class MainActivity extends Activity {
 
         
         String jsonUrl="http://localhost:8888/JSON";//自己的服务器测试工程，设置手动代理的时候可以访问
-        String jsonArrayUrl="http://localhost:8888/testByJSP.action";//自己的服务器测试工程，设置手动代理的时候可以访问
 //       服务器获取的json字符串格式{"success":true,"user":{"password":"JSON","name":"JSONServlet","say":"Hello , i am a servlet !","id":"123"}}
+        String jsonArrayUrl="http://localhost:8888/testByJSP.action";//自己的服务器测试工程，设置手动代理的时候可以访问
         String url="http://www.baidu.com";
         String xmlUrl="http://flash.weather.com.cn/wmaps/xml/china.xml";
-        String imgUrl="http://img5.duitang.com/uploads/item/201408/01/20140801210934_KNvFR.thumb.700_0.jpeg";
+        String imgUrl="https://img.alicdn.com/tps/TB1z1J6KVXXXXaZXpXXXXXXXXXX-520-280.jpg";
 //        getXml(xmlUrl);
-//        getImg(imgUrl);
+        getImg(imgUrl);
 //        getString(url);
 		getJson(jsonUrl);
 		
@@ -74,9 +76,14 @@ public class MainActivity extends Activity {
 		
 		
     }
+    
+    
+    public void cancel(View v){
+    	RequestUtils.onStop("img");
+    }
 
 	private void getJsonArray(String jsonUrl) {
-		RequestUtils.getJsonArrayResult(context, jsonUrl, new ResponseCallBackListener() {
+		RequestUtils.getJsonArrayResult(context, null, jsonUrl, new ResponseCallBackListener() {
 			
 			@Override
 			public void OnResponseCallBack(Result result) {
@@ -94,7 +101,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void getGson(String jsonUrl) {
-		RequestUtils.getGsonResult(context, jsonUrl, UserAllInfo.class, new ResponseCallBackListener() {
+		RequestUtils.getGsonResult(context, null, jsonUrl, UserAllInfo.class, new ResponseCallBackListener() {
 			
 			@Override
 			public void OnResponseCallBack(Result result) {
@@ -108,7 +115,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void getXml(String xmlUrl) {
-		RequestUtils.getXmlResult(context, xmlUrl,City.class, new ResponseCallBackListener() {
+		RequestUtils.getXmlResult(context, null,xmlUrl, City.class, new ResponseCallBackListener() {
 	
 			@Override
 			public void OnResponseCallBack(Result result) {
@@ -124,7 +131,7 @@ public class MainActivity extends Activity {
 
 	private void getString(String url) {
 		//1.获取String get方式
-        RequestUtils.getStringResult(context, url, new ResponseCallBackListener() {
+        RequestUtils.getStringResult(context, null, url, new ResponseCallBackListener() {
 			
 			@Override
 			public void OnResponseCallBack(Result result) {
@@ -136,7 +143,7 @@ public class MainActivity extends Activity {
        Map<String, String> map = new HashMap<String, String>();  
         map.put("params1", "value1");  
         map.put("params2", "value2");  
-        RequestUtils.postStringResult(context, url,map, new ResponseCallBackListener() {
+        RequestUtils.postStringResult(context, null,url, map, new ResponseCallBackListener() {
 			
 			@Override
 			public void OnResponseCallBack(Result result) {
@@ -147,7 +154,7 @@ public class MainActivity extends Activity {
 
 	private void getJson(String url) {
 		// 3.获取json对象
-		   RequestUtils.getJsonObjectResult(context, url, new ResponseCallBackListener() {
+		   RequestUtils.getJsonObjectResult(context, null, url, new ResponseCallBackListener() {
 
 	    @Override
 		public void OnResponseCallBack(Result result) {
@@ -176,27 +183,31 @@ public class MainActivity extends Activity {
 
 	private void getImg(String imgUrl) {
 		 //6.NetworkImageView方式加载图片
-        RequestUtils.getNetworkImageViewResult(context, imgUrl, niv_show, R.drawable.ic_launcher, R.drawable.pink, 400, 0, null);
+//        RequestUtils.getNetworkImageViewResult(context, null, imgUrl, niv_show, R.drawable.ic_launcher, R.drawable.pink, 400, 0, null);
         //5.获取图片，用ImageLoader方式，更高效
         	
-//        	RequestUtils.getImageLoaderResult(context, imgUrl, iv_show, R.drawable.ic_launcher, R.drawable.pink, 400, 0, null);
+        RequestUtils.getImageLoaderResult(context, "img",imgUrl, iv_show, R.drawable.ic_launcher, R.drawable.pink, 1600, 0, null);
         
         //4.获取图片，用imgRequest 
-        RequestUtils.getImageResult(context, imgUrl,600,600, new ResponseCallBackListener() {
-			
-			@Override
-			public void OnResponseCallBack(Result result) {
-				if(result.getState()==Constants.STATUS_SUCCESS){
-					iv_show.setImageBitmap((Bitmap) result.getTag());
-				}else{
-					iv_show.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_launcher));
-				}
-				
-			}
-		});
+//        RequestUtils.getImageResult(context, null,imgUrl,600, 600, new ResponseCallBackListener() {
+//			
+//			@Override
+//			public void OnResponseCallBack(Result result) {
+//				if(result.getState()==Constants.STATUS_SUCCESS){
+//					iv_show.setImageBitmap((Bitmap) result.getTag());
+//				}else{
+//					iv_show.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_launcher));
+//				}
+//				
+//			}
+//		});
 	}
 
-    
+    @Override
+    protected void onStop() {
+    	super.onStop();
+    	RequestUtils.onStop("img");
+    }
    
   
 }

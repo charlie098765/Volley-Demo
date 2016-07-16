@@ -11,37 +11,37 @@ public final class R {
     public static final class attr {
     }
     public static final class dimen {
-        /**  Default screen margins, per the Android Design guidelines. 
-
-         Example customization of dimensions originally defined in res/values/dimens.xml
-         (such as screen margins) for screens with more than 820dp of available width. This
-         would include 7" and 10" devices in landscape (~960dp and ~1280dp respectively).
-    
-         */
         public static final int activity_horizontal_margin=0x7f040000;
         public static final int activity_vertical_margin=0x7f040001;
+        public static final int activity_vertical_margin1=0x7f040002;
+        public static final int activity_vertical_margin2=0x7f040003;
+        public static final int activity_vertical_margin3=0x7f040004;
+        public static final int activity_vertical_margin4=0x7f040005;
+        public static final int activity_vertical_margin5=0x7f040006;
     }
     public static final class drawable {
         public static final int girl=0x7f020000;
         public static final int ic_launcher=0x7f020001;
         public static final int pink=0x7f020002;
+        public static final int test=0x7f020003;
     }
     public static final class id {
-        public static final int action_settings=0x7f08000e;
-        public static final int iv_request_img=0x7f080002;
-        public static final int iv_request_img1=0x7f080003;
-        public static final int iv_request_img10=0x7f08000c;
-        public static final int iv_request_img2=0x7f080004;
-        public static final int iv_request_img3=0x7f080005;
-        public static final int iv_request_img4=0x7f080006;
-        public static final int iv_request_img5=0x7f080007;
-        public static final int iv_request_img6=0x7f080008;
-        public static final int iv_request_img7=0x7f080009;
-        public static final int iv_request_img8=0x7f08000a;
-        public static final int iv_request_img9=0x7f08000b;
-        public static final int niv_test=0x7f080000;
-        public static final int tv_city=0x7f080001;
-        public static final int tv_request_str=0x7f08000d;
+        public static final int action_settings=0x7f08000f;
+        public static final int btn_cancel=0x7f080000;
+        public static final int iv_request_img=0x7f080003;
+        public static final int iv_request_img1=0x7f080004;
+        public static final int iv_request_img10=0x7f08000d;
+        public static final int iv_request_img2=0x7f080005;
+        public static final int iv_request_img3=0x7f080006;
+        public static final int iv_request_img4=0x7f080007;
+        public static final int iv_request_img5=0x7f080008;
+        public static final int iv_request_img6=0x7f080009;
+        public static final int iv_request_img7=0x7f08000a;
+        public static final int iv_request_img8=0x7f08000b;
+        public static final int iv_request_img9=0x7f08000c;
+        public static final int niv_test=0x7f080001;
+        public static final int tv_city=0x7f080002;
+        public static final int tv_request_str=0x7f08000e;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;

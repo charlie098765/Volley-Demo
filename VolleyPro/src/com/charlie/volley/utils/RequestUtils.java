@@ -12,12 +12,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.android.volley.Request;
 import com.android.volley.Request.Method;
 import com.android.volley.AuthFailureError;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
@@ -41,36 +41,36 @@ import com.charlie.volley.interfaces.ResponseCallBackListener;
  *
  */
 public  class RequestUtils {
-	private final static String TAG="RequestUtils_VolleyLog";
-	
-	
+	private final static String TAG="RequestUtils";
+
 	/**
 	 * 获取Gson对象
 	 * @param context
+	 * @param tag 设置请求的标签，方便取消请求
 	 * @param url
 	 * @param klass
 	 * @param listener
 	 */
-	public static void getGsonResult(Context context,String url, Class<? extends Object> klass,final ResponseCallBackListener listener){
+	public static void getGsonResult(Context context,String tag, String url,Class<? extends Object> klass, final ResponseCallBackListener listener){
 		GsonRequest<Object>  gr=new GsonRequest<Object>(klass, url, new Listener<Object>() {
 			@Override
 			public void onResponse(Object response) {
 					listener.OnResponseCallBack(new Result().setState(Constants.STATUS_SUCCESS).setTag(response));	
 			}
 		}, getErrorListener(listener));
-		
-		addToQueue(gr);
+		addToQueue(gr, tag);
 	
 	}	
 	
 	/** 
 	 * 获取xml
 	 * @param context
+	 * @param tag 设置请求的标签，方便取消请求
 	 * @param url
 	 * @param klass
 	 * @param listener
 	 */
-	public static void getXmlResult(Context context,String url,final Class<?  extends XmlObject> klass,final ResponseCallBackListener listener){
+	public static void getXmlResult(Context context,String tag,String url,final Class<?  extends XmlObject> klass, final ResponseCallBackListener listener){
 		
 		Listener<XmlPullParser> xmlListener=new Listener<XmlPullParser>(){
 
@@ -97,34 +97,37 @@ public  class RequestUtils {
 					
 				}
 				
-				Log.i(TAG,"xml list-------->"+list.toString());
+				CHLog.i(TAG,"xml list"+list.toString());
 				listener.OnResponseCallBack(new Result().setState(Constants.STATUS_SUCCESS).setTag(list.toString()));
 			}
 			
 		};
 		
 		XmlRequest xr=new XmlRequest(url,xmlListener, getErrorListener(listener));
-		addToQueue(xr);
+		addToQueue(xr, tag);
 	}	
 	
 	/**
 	 * 获取图片，NetworkImageView方式加载网络图片
 	 * @param context
+	 * @param tag 设置请求的标签，方便取消请求
 	 * @param url
-	 * @param view
-	 * @param nImageView
 	 * @param defaultImageResId
 	 * @param errorImageResId
 	 * @param maxWidth
 	 * @param maxHeight
 	 * @param listener
+	 * @param view
+	 * @param nImageView
 	 */
-	public static void getNetworkImageViewResult(Context context,String url,NetworkImageView networkImageView,int defaultImageResId,int errorImageResId,int maxWidth,int maxHeight,final ResponseCallBackListener listener){
+	public static void getNetworkImageViewResult(Context context,String tag,String url,NetworkImageView networkImageView,int defaultImageResId,int errorImageResId,int maxWidth,int maxHeight, final ResponseCallBackListener listener){
 		BitmapCache cache=  BitmapCache.getInstance(context);
 		ImageLoader imgLoader=new ImageLoader(CHApplication.getRequestQueue(),cache);
 		networkImageView.setDefaultImageResId(defaultImageResId);
 		networkImageView.setErrorImageResId(errorImageResId);
 		networkImageView.setImageUrl(url, imgLoader);
+		
+		
 	}	
 	
 
@@ -139,22 +142,44 @@ public  class RequestUtils {
 	 * @param maxHeight
 	 * @param listener
 	 */
-	public static void getImageLoaderResult(Context context,String url,ImageView view,int defaultImageResId,int errorImageResId,int maxWidth,int maxHeight,final ResponseCallBackListener listener){
-
+	private static String tagFlag;
+	private static CustomImageLoader imgLoader;
+	public static void getImageLoaderResult(Context context,String tag,final String url,ImageView view,int defaultImageResId,int errorImageResId,final int maxWidth,final int maxHeight, final ResponseCallBackListener listener){
+		tagFlag=tag;
 		BitmapCache cache=  BitmapCache.getInstance(context);
-		ImageLoader imgLoader=new ImageLoader(CHApplication.getRequestQueue(),cache);
-		ImageListener imgListener=ImageLoader.getImageListener(view, defaultImageResId, errorImageResId);
+		final ImageListener imgListener=ImageLoader.getImageListener(view, defaultImageResId, errorImageResId);
+		imgLoader=new CustomImageLoader(CHApplication.getRequestQueue(),cache);
 		imgLoader.get(url, imgListener, maxWidth, maxHeight);
+		
 	}
+	
+	private static class CustomImageLoader extends ImageLoader{
+		private static  ImageContainer ic;
+		public CustomImageLoader(RequestQueue queue, ImageCache imageCache) {
+			super(queue, imageCache);
+		}
+		@Override
+		public ImageContainer get(String requestUrl,
+				ImageListener imageListener, int maxWidth, int maxHeight) {
+			 ic=super.get(requestUrl, imageListener, maxWidth, maxHeight);
+			return ic;
+		}
+
+		public  void cancelRequest(){
+			ic.cancelRequest();
+		}
+	}
+	
 	/**
 	 * 加载图片
 	 * @param context
+	 * @param tag 设置请求的标签，方便取消请求
 	 * @param url
 	 * @param maxWidth
 	 * @param maxHeight
 	 * @param listener
 	 */
-	public static void getImageResult(Context context,String url,int maxWidth,int maxHeight,final ResponseCallBackListener listener){
+	public static void getImageResult(Context context,String tag,String url,int maxWidth,int maxHeight, final ResponseCallBackListener listener){
 		Response.Listener<Bitmap> rListener=new  Response.Listener<Bitmap>(){
 
 			@Override
@@ -175,15 +200,16 @@ public  class RequestUtils {
 		 */
 		ImageRequest ir=new ImageRequest(url, rListener, maxWidth, maxHeight,Config.ARGB_8888, getErrorListener(listener));
 	
-		addToQueue(ir);
+		addToQueue(ir, tag);
 	}
 	/**
 	 * 获取jsonArray
 	 * @param context
+	 * @param tag 设置请求的标签，方便取消请求
 	 * @param url
 	 * @param listener
 	 */
-	public static void getJsonArrayResult(Context context,String url,final ResponseCallBackListener listener){
+	public static void getJsonArrayResult(Context context,String tag,String url, final ResponseCallBackListener listener){
 		JsonArrayRequest jar=new JsonArrayRequest(url,new Listener<JSONArray>() {
 
 			@Override
@@ -194,42 +220,50 @@ public  class RequestUtils {
 				
 			}
 		}, getErrorListener(listener));
-		addToQueue(jar);
+		addToQueue(jar, tag);
 	
 	}		
 		/**
 	 * 请求获取json对象
 	 * @param context
-	 * @param url
-	 * @param map
-	 * @param listener
+		 * @param tag 设置请求的标签，方便取消请求
+		 * @param url
+		 * @param listener
+		 * @param map
 	 */
-	public static void getJsonObjectResult(Context context,String url,final ResponseCallBackListener listener){
+	public static void getJsonObjectResult(Context context,String tag,String url, final ResponseCallBackListener listener){
 		
 		 JsonObjectRequest	joRequest = new JsonObjectRequest(Method.POST,url, null, new Response.Listener<JSONObject>() {
 
 				@Override
 				public void onResponse(JSONObject response) {
-					Log.i(TAG, response.toString());
-					listener.OnResponseCallBack(new Result().setState(Constants.STATUS_SUCCESS).setTag(response));
+					CHLog.i(TAG, response.toString());
+					listener.OnResponseCallBack(new Result()
+					.setMessage(response.toString())
+					.setState(Constants.STATUS_SUCCESS)
+					.setTag(response));
 					
 				}
 			},new Response.ErrorListener() {
 
 				@Override
 				public void onErrorResponse(VolleyError error) {
-					Log.i(TAG, "network error:"+error==null?null:error.getMessage(),error);
-					listener.OnResponseCallBack(new Result().setTag(error));
+					CHLog.i(TAG, "network error:"+error==null?null:error.getMessage(),error);
+					listener.OnResponseCallBack(new Result()
+					.setMessage(error.getMessage())
+					.setState(Constants.STATUS_ERROR)
+					.setTag(error));
 					
 				}
 			});
-			addToQueue(joRequest);
+			addToQueue(joRequest, tag);
 
 		
 		
 	}
 
-	private static void addToQueue(@SuppressWarnings("rawtypes") Request request) {
+	private static void addToQueue(@SuppressWarnings("rawtypes") Request request, String tag) {
+		request.setTag(tag);
 		CHApplication.getRequestQueue().add(request);
 		CHApplication.getRequestQueue().start();
 	}
@@ -239,18 +273,19 @@ public  class RequestUtils {
 	/**
 	 * post方式发送请求,获取String对象
 	 * @param context
+	 * @param tag 设置请求的标签，方便取消请求
 	 * @param url
 	 * @param map
 	 * @param listener
 	 */
-	public static void postStringResult(Context context,String url,final Map<String,String> map,final ResponseCallBackListener listener){
+	public static void postStringResult(Context context,String tag,String url,final Map<String,String> map, final ResponseCallBackListener listener){
 		StringRequest sq=new StringRequest(Method.POST, url,getListener(listener), getErrorListener(listener)){
 			@Override
 			protected Map<String, String> getParams() throws AuthFailureError {
 		        return map; 
 			}
 		};
-		addToQueue(sq);
+		addToQueue(sq, tag);
 		
 	}
 	
@@ -258,10 +293,11 @@ public  class RequestUtils {
 	/**
 	 * 获取请求的字符串,get请求
 	 * @param context
+	 * @param tag 设置请求的标签，方便取消请求
 	 * @param url
 	 * @param listener
 	 */
-    public static void getStringResult(Context context,String url,final ResponseCallBackListener listener){
+    public static void getStringResult(Context context,String tag,String url, final ResponseCallBackListener listener){
     	
     	/**
     	 * 发出一条HTTP请求，我们还需要创建一个StringRequest对象
@@ -275,7 +311,7 @@ public  class RequestUtils {
     	 */
     	StringRequest sq=new StringRequest(url,getListener(listener),getErrorListener(listener));
     	
-    	addToQueue(sq);
+    	addToQueue(sq, tag);
     	
     }
     
@@ -287,7 +323,7 @@ public  class RequestUtils {
 
 			@Override
 			public void onErrorResponse(VolleyError error) {
-				Log.i(TAG, "network error:"+error==null?null:error.getMessage(),error);
+				CHLog.i(TAG, "network error:"+error==null?null:error.getMessage(),error);
 				listener.OnResponseCallBack(new Result().setState(Constants.STATUS_ERROR).setTag(error));
 			}
 		};
@@ -299,10 +335,38 @@ public  class RequestUtils {
 			@Override
 			public void onResponse(String response) {
 				
-				Log.i(TAG, response);
+				CHLog.i(TAG, response);
 				listener.OnResponseCallBack(new Result().setState(Constants.STATUS_SUCCESS).setMessage(response));
 			}
 		};
 	}
+	
+	/**
+	 * 关闭特定标签的网络请求
+	 *可以在Activity的onStop()方法里面执行
+	 * @param tag
+	 * 
+	 */
+	public  static void onStop(String tag){
+		if(tagFlag!=null&&imgLoader!=null){
+			imgLoader.cancelRequest();
+			tagFlag=null;
+		}else{
+			CHApplication.getRequestQueue().cancelAll(tag);
+		}
+	}
+	/**
+	 * 取消这个队列里面的所有的网络请求
+	 *可以在Activity的onStop()方法里面执行
+	 * @param tag
+	 * 
+	 */
+	public static void onStopAll(Context context){
+		CHApplication.getRequestQueue().cancelAll(context);
+		
+	}
+
+
+	
 	
 }
